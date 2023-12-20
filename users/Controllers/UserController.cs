@@ -1,6 +1,7 @@
 using Api.Context;
 using Api.users.DTOs;
 using Api.users.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,30 +25,15 @@ public class UserController : ControllerBase
     return users;
   }
 
-  [HttpPost]
-  public async Task<ActionResult<User>> CreateUser(CreateUserDTO input)
+  [Authorize]
+  [HttpGet("{id}")]
+
+  public async Task<ActionResult<User>> GetUser(int id)
   {
-    try
-    {
-      var user = await db.Users.SingleOrDefaultAsync(user => user.UserName.ToLower() == input.UserName);
-      if (user is not null) return BadRequest("user already exist");
-
-      // User newUser = new()
-      // {
-      //   Name = input.Name,
-      //   Email = input.Email,
-      //   Phone = input.Phone,
-      //   Address = input.Address
-      // };
-
-      // await db.Users.AddAsync(newUser);
-      // await db.SaveChangesAsync();
-      return Ok(user);
-    }
-    catch (Exception ex)
-    {
-      return BadRequest(ex.Message);
-    }
-
+    var user = await db.Users.FirstOrDefaultAsync(user => user.Id == id);
+    if (user is null) return NotFound("Invalid user ID");
+    return user;
   }
+
 }
+
