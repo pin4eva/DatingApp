@@ -27,15 +27,15 @@ public class AuthController(DataContext db, ITokenService tokenService) : Contro
   public async Task<ActionResult<User>> Register(RegisterDTO input)
 
   {
-    string username = input.UserName.ToLower();
-    var existingUser = await db.Users.FirstOrDefaultAsync((user) => user.UserName.ToLower() == username);
+    string username = input.Username.ToLower();
+    var existingUser = await db.Users.FirstOrDefaultAsync((user) => user.Username.ToLower() == username);
 
     if (existingUser is not null) return BadRequest("User with username already exist");
     using var hmac = new HMACSHA512();
 
     var user = new User
     {
-      UserName = username.ToLower(),
+      Username = username.ToLower(),
       PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(input.Password)),
       PasswordSalt = hmac.Key
     };
@@ -48,8 +48,8 @@ public class AuthController(DataContext db, ITokenService tokenService) : Contro
   [HttpPost("login")]
   public async Task<ActionResult<LoginResponse>> Login(LoginDTO input)
   {
-    string UserName = input.UserName.ToLower();
-    var user = await db.Users.FirstOrDefaultAsync((user) => user.UserName == UserName);
+    string UserName = input.Username.ToLower();
+    var user = await db.Users.FirstOrDefaultAsync((user) => user.Username == UserName);
 
     if (user is null) return Unauthorized("User with username not found");
 
@@ -61,7 +61,7 @@ public class AuthController(DataContext db, ITokenService tokenService) : Contro
     }
 
     string token = tokenService.CreateToken(user);
-    var response = new LoginResponse(Token: token, Id: user.Id, UserName: user.UserName);
+    var response = new LoginResponse(Token: token, Id: user.Id, Username: user.Username);
 
 
     return response;
