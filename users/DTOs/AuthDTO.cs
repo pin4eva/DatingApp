@@ -4,7 +4,7 @@ namespace Api.users.DTOs;
 
 public record RegisterDTO(
 [Required] string Username,
-[Required] string Password
+[Required, StringLength(6)] string Password
 );
 
 

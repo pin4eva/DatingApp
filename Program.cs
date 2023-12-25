@@ -1,4 +1,5 @@
 using Api.Extensions;
+using Api.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,15 +10,19 @@ builder.Services.AddApplicationService(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionMiddlewares>();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
 }
 
 app.UseHttpsRedirection();
+
 
 app.UseCors(builder =>
 builder.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200")
