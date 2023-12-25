@@ -1,6 +1,7 @@
 using System.Text;
 using Api.Context;
 using Api.users.Interfaces;
+using Api.users.Repository;
 using Api.users.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -18,13 +19,21 @@ public static class ApplicationServiceExtension
     services.AddControllers();
     services.AddCors();
     services.AddScoped<ITokenService, TokenService>();
+    services.AddScoped<IUserRepository, UserRepository>();
+    services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
     services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+      var TokenKey = configuration["TokenKey"];
+      if (TokenKey is null)
+      {
+        Console.WriteLine("please add a TokenKey");
+        return;
+      }
       options.TokenValidationParameters = new TokenValidationParameters
       {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["TokenKey"])),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(TokenKey)),
         ValidateIssuer = false,
         ValidateAudience = false,
       };
