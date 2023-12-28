@@ -1,11 +1,10 @@
-using Api.Context;
+using System.Security.Claims;
 using Api.users.DTOs;
 using Api.users.Models;
 using Api.users.Repository;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Api.users.Controllers;
 [Authorize]
@@ -23,6 +22,16 @@ public class UserController(IUserRepository userRepository, IMapper _mapper) : C
     var users = await repository.GetUsers();
     var mappedUsers = mapper.Map<IEnumerable<MemberDTO>>(users);
     return Ok(mappedUsers);
+  }
+
+
+  [HttpGet("members")]
+
+  public async Task<ActionResult<IEnumerable<MemberDTO>>> GetMembers()
+  {
+    var users = await repository.GetMembers();
+
+    return Ok(users);
   }
 
   [HttpGet("{id}")]
@@ -45,6 +54,17 @@ public class UserController(IUserRepository userRepository, IMapper _mapper) : C
     return Ok(mappedUser);
   }
 
+  [HttpGet("members/username/{username}")]
+
+  public async Task<ActionResult<MemberDTO>> GetMemberByUsername(string username)
+  {
+    var user = await repository.GetUserByUsername(username);
+    if (user is null) return NotFound("Invalid user username");
+    var mappedUser = mapper.Map<MemberDTO>(user);
+    return Ok(mappedUser);
+  }
+
+
   [HttpGet("username/{username}")]
 
   public async Task<ActionResult<User>> GetUserByUsername(string username)
@@ -55,5 +75,17 @@ public class UserController(IUserRepository userRepository, IMapper _mapper) : C
     return Ok(mappedUser);
   }
 
+  [HttpPut]
+  public async Task<ActionResult> UpdateUser(UpdateMemberDTO input)
+  {
+    var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    if (username is null) return Unauthorized("username not found");
+    var user = await repository.GetUserByUsername(username);
+    if (user is null) return NotFound("User with username not found");
+    mapper.Map(input, user);
+
+    if (await repository.SaveAllAsync()) return NoContent();
+    else return BadRequest("Failed to save changes");
+  }
 }
 

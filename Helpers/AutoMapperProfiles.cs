@@ -21,6 +21,7 @@ dest.Age,
 opt => opt.MapFrom(source => source.DateOfBirth.CalculateAge())
 );
     CreateMap<Photo, PhotoDTO>();
+    CreateMap<UpdateMemberDTO, User>();
   }
 
 }

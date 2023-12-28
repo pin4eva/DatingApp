@@ -9,6 +9,7 @@ public record CreateUserDTO(
 
 
 public record UserDTO(
-string UserName,
+string Username,
 string Token
 );
+

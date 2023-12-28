@@ -1,15 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Api.Context;
 using Api.users.DTOs;
 using Api.users.Interfaces;
 using Api.users.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,10 +15,11 @@ namespace Api.users.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController(DataContext db, ITokenService tokenService) : ControllerBase
+public class AuthController(DataContext db, ITokenService tokenService, IMapper _mapper) : ControllerBase
 {
   private readonly DataContext db = db;
   private readonly ITokenService tokenService = tokenService;
+  private readonly IMapper mapper = _mapper;
 
 
   [HttpPost("register")]
@@ -66,5 +65,17 @@ public class AuthController(DataContext db, ITokenService tokenService) : Contro
 
     return response;
 
+  }
+  [Authorize]
+  [HttpGet("me")]
+  public async Task<ActionResult<MemberDTO>> GetMe()
+  {
+    var id = User.Claims.FirstOrDefault(claim => claim.Type == "Id")?.Value;
+
+    if (id is null) return Unauthorized("Id not found");
+    var user = await db.Users.FindAsync(int.Parse(id));
+    if (user is null) return NotFound("User not found");
+    return mapper.Map<MemberDTO>(user);
+    // var user = await db.Users.FirstOrDefaultAsync((u)=>identity.Identity.Name)
   }
 }

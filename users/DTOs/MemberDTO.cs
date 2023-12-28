@@ -19,3 +19,13 @@ public class MemberDTO
   public List<PhotoDTO> Photos { get; set; } = [];
 
 }
+
+public record UpdateMemberDTO(
+  int Id,
+  string Introduction,
+  string LookingFor,
+  string Interest,
+  string City,
+  string Country,
+  string Gender
+);

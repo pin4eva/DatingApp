@@ -1,4 +1,5 @@
 
+using System.Text.Json;
 using Api.Context;
 using Api.users.DTOs;
 using Api.users.Models;
@@ -39,9 +40,9 @@ public class UserRepository(DataContext _db, IMapper _mapper) : IUserRepository
   public async Task<IEnumerable<MemberDTO>> GetMembers()
   {
     var users = await db.Users.ProjectTo<MemberDTO>(mapper.ConfigurationProvider)
-.ToListAsync();
+  .ToListAsync();
+    Console.WriteLine(JsonSerializer.Serialize(users));
     return users;
-
   }
 
   public async Task<User?> GetUserById(int id)
